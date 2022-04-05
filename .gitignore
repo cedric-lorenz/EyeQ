@@ -1,0 +1,6 @@
+*.tar
+*.pyc
+*.pyc
+*/*.pyc
+*/*.json
+*.json

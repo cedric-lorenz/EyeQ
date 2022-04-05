@@ -1,5 +1,2 @@
-*.pyc
-*/*.pyc
-*/*.json
-*.json
 .vscode/*
+/original_crop

@@ -6,6 +6,7 @@ from PIL import Image, ImageCms
 import os
 from sklearn import preprocessing
 import pandas as pd
+import os
 
 
 def load_eyeQ_excel(data_dir, list_file, n_class=3):
@@ -18,7 +19,7 @@ def load_eyeQ_excel(data_dir, list_file, n_class=3):
 
     for idx in range(img_num):
         image_name = df_tmp["image"][idx]
-        image_names.append(os.path.join(data_dir, image_name[:-5] + '.png'))
+        image_names.append(os.path.join(data_dir, image_name[:-5] + '.jpeg'))
 
         label = lb.transform([int(df_tmp["quality"][idx])])
         labels.append(label)
@@ -32,6 +33,7 @@ class DatasetGenerator(Dataset):
         image_names, labels = load_eyeQ_excel(data_dir, list_file, n_class=3)
 
         self.image_names = image_names
+        self.data_dir = data_dir
         self.labels = labels
         self.n_class = n_class
         self.transform1 = transform1
@@ -40,11 +42,12 @@ class DatasetGenerator(Dataset):
 
         srgb_profile = ImageCms.createProfile("sRGB")
         lab_profile = ImageCms.createProfile("LAB")
-        self.rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(srgb_profile, lab_profile, "RGB", "LAB")
+        self.rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(
+            srgb_profile, lab_profile, "RGB", "LAB")
 
     def __getitem__(self, index):
         image_name = self.image_names[index]
-        image = Image.open(image_name).convert('RGB')
+        image = Image.open(self.data_dir + '/' + image_name).convert('RGB')
 
         if self.transform1 is not None:
             image = self.transform1(image)
@@ -70,3 +73,21 @@ class DatasetGenerator(Dataset):
     def __len__(self):
         return len(self.image_names)
 
+
+class DukeDatasetGenerator(DatasetGenerator):
+    def __init__(self, data_dir, transform1=None, transform2=None, n_class=3, set_name='test'):
+
+        image_names = [f for f in os.listdir(
+            data_dir) if os.path.isfile(os.path.join(data_dir, f))]
+
+        self.image_names = image_names
+        self.data_dir = data_dir
+        self.n_class = n_class
+        self.transform1 = transform1
+        self.transform2 = transform2
+        self.set_name = set_name
+
+        srgb_profile = ImageCms.createProfile("sRGB")
+        lab_profile = ImageCms.createProfile("LAB")
+        self.rgb2lab_transform = ImageCms.buildTransformFromOpenProfiles(
+            srgb_profile, lab_profile, "RGB", "LAB")

@@ -5,8 +5,9 @@ import cv2 as cv
 from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
+
 def process(image_list, save_path):
-    
+
     for image_path in image_list:
         dst_image = os.path.splitext(image_path.split('/')[-1])[0]+'.png'
         dst_path = os.path.join(save_path, dst_image)
@@ -18,6 +19,7 @@ def process(image_list, save_path):
             r_img, borders, mask = prep.process_without_gb(img)
             r_img = cv.resize(r_img, (800, 800))
             prep.imwrite(dst_path, r_img)
+            print(f"wrote img to {dst_path}")
             # mask = cv.resize(mask, (800, 800))
             # prep.imwrite(os.path.join('./original_mask', dst_image), mask)
         except:
@@ -27,14 +29,9 @@ def process(image_list, save_path):
 
 if __name__ == "__main__":
 
-    image_list = glob.glob(os.path.join('./original_img', '*.jpeg'))
-    save_path = prep.fold_dir('./original_crop')
+    image_list = glob.glob(os.path.join(
+        '/dhc/groups/bp2021cl1/data/retinas/eyePACS/train', '*.jpeg'))
+    save_path = prep.fold_dir(
+        '/dhc/groups/bp2021cl1/data/retinas/eyePACS/cropped')
 
     process(image_list, save_path)
-
-        
-
-
-
-
-
